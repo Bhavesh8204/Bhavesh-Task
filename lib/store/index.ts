@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import propertyReducer from "./propertySlice";
+import cartReducer from "./cartSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       properties: propertyReducer,
+      cart: cartReducer,
     },
   });
 };

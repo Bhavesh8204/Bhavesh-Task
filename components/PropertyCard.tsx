@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import React from "react";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { FaHeart, FaRegHeart, FaShoppingCart, FaCheck } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "../lib/store";
 import { Product, toggleFavorite } from "../lib/store/propertySlice";
+import { addToCart, setCartOpen } from "../lib/store/cartSlice";
 
 interface PropertyCardProps {
   property: Product;
@@ -13,13 +15,23 @@ interface PropertyCardProps {
 export default function PropertyCard({ property }: PropertyCardProps) {
   const dispatch = useAppDispatch();
   const favorites = useAppSelector((state) => state.properties.favorites);
+  const cartItems = useAppSelector((state) => state.cart.items);
 
   const isFavorite = favorites.includes(property.id);
+  const isInCart = cartItems.some((item) => item.id === property.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     dispatch(toggleFavorite(property.id));
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch(addToCart(property));
+    toast.success(`${property.title} added to cart!`);
+    dispatch(setCartOpen(true));
   };
 
   const formatPrice = (price: number) => {
@@ -62,9 +74,19 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </div>
 
-        <Link href={`/property/${property.id}`} className="card-detail-link">
-          View Property
-        </Link>
+        <div className="card-actions-row">
+          <Link href={`/property/${property.id}`} className="card-detail-link">
+            View Property
+          </Link>
+          <button
+            onClick={handleAddToCart}
+            className={`card-add-cart-btn ${isInCart ? "in-cart" : ""}`}
+            title={isInCart ? "In Cart" : "Add to Cart"}
+            aria-label="Add to cart"
+          >
+            {isInCart ? <FaCheck /> : <FaShoppingCart />}
+          </button>
+        </div>
       </div>
     </div>
   );
