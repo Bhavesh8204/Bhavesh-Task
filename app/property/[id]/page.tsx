@@ -3,7 +3,14 @@
 import Link from "next/link";
 import React, { use, useEffect, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { FaArrowLeft, FaHeart, FaRegHeart, FaStar } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaHeart,
+  FaRegHeart,
+  FaStar,
+  FaShoppingCart,
+  FaCheck,
+} from "react-icons/fa";
 import Header from "../../../components/Header";
 import Loader from "../../../components/Loader";
 import { useAppDispatch, useAppSelector } from "../../../lib/store";
@@ -12,6 +19,7 @@ import {
   Product,
   toggleFavorite,
 } from "../../../lib/store/propertySlice";
+import { addToCart, setCartOpen } from "../../../lib/store/cartSlice";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -26,7 +34,12 @@ export default function PropertyDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
 
   const favorites = useAppSelector((state) => state.properties.favorites);
+  const cartItems = useAppSelector((state) => state.cart.items);
+
   const isFavorite = property ? favorites.includes(property.id) : false;
+  const isInCart = property
+    ? cartItems.some((item) => item.id === property.id)
+    : false;
 
   useEffect(() => {
     dispatch(loadFavorites());
@@ -65,6 +78,13 @@ export default function PropertyDetailPage({ params }: PageProps) {
     } else {
       toast.success("Removed from your favorite spaces.");
     }
+  };
+
+  const handleAddToCart = () => {
+    if (!property) return;
+    dispatch(addToCart(property));
+    toast.success(`${property.title} added to cart!`);
+    dispatch(setCartOpen(true));
   };
 
   const formatPrice = (price: number) => {
@@ -172,6 +192,20 @@ export default function PropertyDetailPage({ params }: PageProps) {
                   {property.rating.toFixed(2)}
                 </span>
               </div>
+            </div>
+
+            <div className="detail-actions-box">
+              <button
+                onClick={handleAddToCart}
+                className={`detail-add-cart-btn ${isInCart ? "in-cart" : ""}`}
+              >
+                {isInCart ? (
+                  <FaCheck style={{ marginRight: "6px" }} />
+                ) : (
+                  <FaShoppingCart style={{ marginRight: "6px" }} />
+                )}
+                <span>{isInCart ? "Add Another to Cart" : "Add to Cart"}</span>
+              </button>
             </div>
 
             <div className="detail-desc-box">
